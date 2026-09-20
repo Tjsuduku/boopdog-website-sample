@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boopdog</title>
+</head>
+<body>
 <title>Boopdog Home</title>
 <meta name="description" content="Custom leashes and gear for dogs who go places — animated landing page prototype for Boopdog.">
 <style>
@@ -176,6 +179,20 @@
   .cart-empty{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; padding:40px 10px; color:var(--ink-soft); flex:1; justify-content:center; }
   .cart-empty .paw-big{ font-size:40px; }
 
+  /* Nav menu drawer floats as a rounded brown panel, distinct from the (lighter) cart drawer */
+  #drawer{
+    top:14px; left:14px; height:calc(100% - 28px);
+    border-radius:26px;
+    background:linear-gradient(165deg, var(--mustard-deep) 0%, #2A1D12 100%);
+    box-shadow:0 30px 60px -18px rgba(20,14,9,.55), 0 0 0 1px rgba(255,255,255,.08);
+  }
+  #drawer .drawer-title{ color:#fff; }
+  #drawer .drawer-close{ color:#fff; opacity:.85; }
+  #drawer .drawer-close:hover{ opacity:1; }
+  #drawer a{ color:#fff; }
+  #drawer a{ border-bottom:1px solid rgba(255,255,255,.12); border-radius:12px; }
+  #drawer a:hover{ background:rgba(255,255,255,.14); }
+
   /* Expanding search bar under the nav */
   .search-bar{
     max-height:0; overflow:hidden; transition:max-height .3s ease, padding .3s ease;
@@ -246,9 +263,21 @@
     stroke-dasharray: var(--journey-len, 1000);
     stroke-dashoffset: var(--journey-len, 1000);
   }
-  .journey-stitch{ stroke:var(--bone); stroke-width:1.5; stroke-dasharray:5 7; fill:none; opacity:.85; }
+  .journey-stitch{ stroke:var(--bone); stroke-width:1.5; stroke-dasharray:3 10; fill:none; opacity:.55; }
   .journey-emoji{ font-size:20px; text-anchor:middle; dominant-baseline:central; }
-  #journeyDot{ font-size:22px; }
+  /* Trees pop up along the sides of the path as it's walked/scrolled */
+  .journey-tree{
+    font-size:22px; text-anchor:middle; dominant-baseline:central;
+    opacity:0; transform-box:fill-box; transform-origin:center bottom;
+    transform:scale(.35) translateY(8px);
+    transition:opacity .45s ease, transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .journey-tree.show{ opacity:1; transform:scale(1) translateY(0); }
+  /* Stylized travelling marker: a small pin badge instead of a bare emoji */
+  .journey-marker{ filter:drop-shadow(0 3px 6px rgba(43,32,24,.35)); }
+  .journey-marker circle{ fill:var(--mustard-deep); stroke:#fff; stroke-width:2; animation:markerPulse 1.7s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+  .journey-marker text{ font-size:13px; }
+  @keyframes markerPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
   #journeyClasp{ filter:drop-shadow(0 3px 6px rgba(43,32,24,.3)); transition:transform .15s ease-out; }
   #journeyRing{ transition:opacity .2s ease, stroke-width .2s ease; }
   #journeyRing.locked{ opacity:1; stroke:var(--mustard-deep); animation:ringPulse .5s ease-out; }
@@ -307,6 +336,11 @@
     0%{ transform:translateY(0) scale(1); }
     45%{ transform:translateY(-4px) scale(1.015); }
     100%{ transform:translateY(0) scale(1); }
+  }
+  .config-steps{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .config-steps span{
+    padding:8px 15px; border-radius:999px; background:var(--bone); border:1px solid var(--line);
+    font-size:13px; font-weight:700; color:var(--ink-soft);
   }
   .order-video{
     aspect-ratio:16/10; border-radius:22px; overflow:hidden;
@@ -482,14 +516,13 @@
     .journey-stop{ font-size:11px; padding:7px 11px; }
   }
 </style>
-</head>
-<body>
 
 <div class="drawer-overlay" id="overlay"></div>
 <nav class="drawer" id="drawer" aria-label="Site menu">
   <button class="drawer-close" id="drawerClose" aria-label="Close menu">&times;</button>
   <div class="drawer-title">Menu</div>
   <a href="#products">Products <span>&rarr;</span></a>
+  <a href="#lifestyle">Lifestyle <span>&rarr;</span></a>
   <a href="#blog">Blogs <span>&rarr;</span></a>
   <a href="#products">Sales <span>&rarr;</span></a>
   <a href="#reviews">Reviews <span>&rarr;</span></a>
@@ -563,7 +596,7 @@
       <p class="lede">Custom leashes, collars and accessories, hand-finished and built to order — for dogs who go places, and the people who take them.</p>
       <div class="hero-cta">
         <a class="btn" href="#products" id="shopCollectionBtn">Shop the collection</a>
-        <a class="btn outline" href="#order" id="buildLeashBtn" style="color:var(--ink); border-color:var(--line);">Build your own leash</a>
+        <a class="btn outline" href="#order" id="buildLeashBtn" style="color:var(--ink); border-color:var(--line);">Build your own set</a>
       </div>
     </div>
   </section>
@@ -583,6 +616,17 @@
         <path class="journey-leash-shadow" d="M120,0 a18,14 0 1,1 0.1,28 a18,14 0 1,0 -0.1,28 C40,100 200,150 120,214 C40,290 208,364 120,470"/>
         <path id="journeyPath" class="journey-leash-progress" d="M120,0 a18,14 0 1,1 0.1,28 a18,14 0 1,0 -0.1,28 C40,100 200,150 120,214 C40,290 208,364 120,470"/>
         <path class="journey-stitch" d="M120,0 a18,14 0 1,1 0.1,28 a18,14 0 1,0 -0.1,28 C40,100 200,150 120,214 C40,290 208,364 120,470"/>
+        <!-- Trees flanking the path, pop up in via JS as scroll progress reaches each one -->
+        <text class="journey-tree" data-at="0.08" x="60" y="70">🌲</text>
+        <text class="journey-tree" data-at="0.10" x="180" y="55">🌳</text>
+        <text class="journey-tree" data-at="0.24" x="195" y="150">🌲</text>
+        <text class="journey-tree" data-at="0.28" x="35" y="175">🌳</text>
+        <text class="journey-tree" data-at="0.45" x="30" y="255">🌲</text>
+        <text class="journey-tree" data-at="0.50" x="205" y="270">🌳</text>
+        <text class="journey-tree" data-at="0.62" x="195" y="335">🌲</text>
+        <text class="journey-tree" data-at="0.66" x="35" y="350">🌳</text>
+        <text class="journey-tree" data-at="0.80" x="40" y="415">🌲</text>
+        <text class="journey-tree" data-at="0.85" x="195" y="430">🌳</text>
         <!-- Fixed ring on "Made to measure" that the clasp locks into -->
         <circle id="journeyRing" cx="120" cy="470" r="19" fill="none" stroke="var(--tan)" stroke-width="4" opacity=".5"/>
         <!-- Clasp: the trigger-hook hardware at the leash's end, right where it reaches "Made to measure" -->
@@ -590,7 +634,11 @@
           <circle cx="120" cy="470" r="14" fill="none" stroke="var(--mustard-deep)" stroke-width="6"/>
           <rect x="113" y="454" width="14" height="26" rx="7" fill="var(--mustard-deep)"/>
         </g>
-        <text id="journeyDot" class="journey-emoji" x="120" y="0" font-size="22">🐾</text>
+        <!-- Travelling marker: a small pin badge (not a bare emoji) -->
+        <g id="journeyDot" class="journey-marker">
+          <circle r="13"/>
+          <text x="0" y="1" text-anchor="middle" dominant-baseline="central">🐾</text>
+        </g>
       </svg>
       <!-- Storyline captions, styled like map call-outs — edit any time. Shown as the leash travels down. -->
       <div class="journey-caption" id="journeyCaption">
@@ -604,8 +652,11 @@
     <div class="wrap order-grid">
       <div>
         <span class="eyebrow">Made to measure</span>
-        <h2 style="font-size:clamp(24px,3.4vw,34px); margin-top:8px;">Design a custom leash, start to finish.</h2>
-        <p style="color:var(--ink-soft); margin-top:14px; max-width:44ch;">Pick the leather, the stitching, the hardware and the length — watch it come together, then order it built just for your dog.</p>
+        <h2 style="font-size:clamp(24px,3.4vw,34px); margin-top:8px;">Build your own set — leash &amp; collar, made to match.</h2>
+        <p style="color:var(--ink-soft); margin-top:14px; max-width:44ch;">Coordinate a leash and collar as one set, built just for your dog. Pick each step below, watch it come together, then order.</p>
+        <div class="config-steps">
+          <span>1. Style</span><span>2. Length</span><span>3. Colour</span><span>4. Hardware</span>
+        </div>
         <a class="btn" href="#" style="margin-top:22px;">Shop now</a>
       </div>
       <div class="order-video">
@@ -659,6 +710,50 @@
             <h3>Starter Bundle</h3>
             <select class="variant"><option>Leash + Collar</option><option>Leash + Harness</option><option>All Three</option></select>
             <div class="price-row"><span class="price" data-target="79">$79</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="lifestyle" id="lifestyle">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">For the humans too</span>
+          <h2 style="font-size:clamp(24px,3.4vw,32px); margin-top:6px;">Gear for your end of the leash.</h2>
+        </div>
+      </div>
+      <div class="product-grid">
+        <article class="product-card">
+          <div class="product-pic">Keychain</div>
+          <div class="product-info">
+            <h3>Leash-Leather Keychain</h3>
+            <div class="price-row"><span class="price" data-target="18">$18</span></div>
+          </div>
+        </article>
+        <article class="product-card">
+          <div class="product-pic">T-Shirt</div>
+          <div class="product-info">
+            <h3>Boopdog Wordmark Tee</h3>
+            <select class="variant"><option>S</option><option>M</option><option>L</option><option>XL</option></select>
+            <div class="price-row"><span class="price" data-target="34">$34</span></div>
+          </div>
+        </article>
+        <article class="product-card">
+          <div class="product-pic">Cards</div>
+          <div class="product-info">
+            <h3>Dog-Person Greeting Cards</h3>
+            <select class="variant"><option>Set of 6</option><option>Set of 12</option></select>
+            <div class="price-row"><span class="price" data-target="14">$14</span></div>
+          </div>
+        </article>
+        <article class="product-card">
+          <div class="product-pic">Gift Card</div>
+          <div class="product-info">
+            <h3>Boopdog Gift Card</h3>
+            <select class="variant"><option>$25</option><option>$50</option><option>$100</option></select>
+            <div class="price-row"><span class="price" data-target="25">$25</span></div>
           </div>
         </article>
       </div>
@@ -785,6 +880,7 @@ try{
   const captionTitle=document.getElementById('journeyCaptionTitle');
   const captionDesc=document.getElementById('journeyCaptionDesc');
   const orderGrid=document.querySelector('.order-grid');
+  const trees=Array.from(document.querySelectorAll('.journey-tree'));
   const len=path.getTotalLength();
   const viewBoxHeight=520;
   wrap.style.setProperty('--journey-len', String(len));
@@ -795,8 +891,12 @@ try{
     path.style.strokeDashoffset=String(len - len*progress);
 
     const pt=path.getPointAtLength(len*progress);
-    dot.setAttribute('x', pt.x);
-    dot.setAttribute('y', pt.y);
+    dot.setAttribute('transform', `translate(${pt.x},${pt.y})`);
+
+    trees.forEach(tree=>{
+      const at=parseFloat(tree.dataset.at || '0');
+      tree.classList.toggle('show', progress>=at);
+    });
 
     if(window.innerWidth>600){
       const svgH=svg.getBoundingClientRect().height;
