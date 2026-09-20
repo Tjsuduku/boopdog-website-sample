@@ -265,25 +265,28 @@
   }
   .journey-stitch{ stroke:var(--bone); stroke-width:1.5; stroke-dasharray:3 10; fill:none; opacity:.55; }
   .journey-emoji{ font-size:20px; text-anchor:middle; dominant-baseline:central; }
-  /* Trees sprout up out of the ground along the sides of the path as it's walked/scrolled.
+  /* Trees grow up out of the ground one at a time as the path is walked/scrolled.
      Drawn as real layered SVG tree shapes (see <symbol id="treePine"/"treeRound">), not emoji.
-     Anchored at the ground (transform-origin bottom) so they visibly rise out of the soil, then
-     bounce past full height and settle — a springy "popping out of the ground" grow-in, not a fade. */
+     Anchored at the ground (transform-origin bottom): a single clean rise with one gentle
+     overshoot, not a repeated bounce — JS staggers each tree's animation-delay (see render())
+     so several revealed in one scroll motion still grow in sequence, not all at once. */
   .journey-tree{
     opacity:0; transform-box:fill-box; transform-origin:50% 100%;
-    transform:scaleY(.02) scaleX(.4);
+    transform:scaleY(.05) scaleX(.6);
     filter:drop-shadow(0 4px 5px rgba(43,32,24,.28));
   }
   .journey-tree.show{
-    animation:treeSprout 2s cubic-bezier(.25,.65,.3,1) forwards, treeSway 5.5s ease-in-out 2s infinite;
+    animation-name:treeGrow, treeSway;
+    animation-duration:1.3s, 5.5s;
+    animation-timing-function:cubic-bezier(.22,.85,.34,1), ease-in-out;
+    animation-iteration-count:1, infinite;
+    animation-fill-mode:forwards, none;
+    /* animation-delay is set per-tree from JS so multiple trees cascade in rather than pop together */
   }
-  @keyframes treeSprout{
-    0%   { opacity:0; transform:scaleY(.02) scaleX(.4); }
-    6%   { opacity:1; }
-    38%  { transform:scaleY(1.22) scaleX(.82); }
-    58%  { transform:scaleY(.88) scaleX(1.08); }
-    76%  { transform:scaleY(1.08) scaleX(.95); }
-    90%  { transform:scaleY(.97) scaleX(1.02); }
+  @keyframes treeGrow{
+    0%   { opacity:0; transform:scaleY(.05) scaleX(.6); }
+    12%  { opacity:1; }
+    72%  { transform:scaleY(1.07) scaleX(.96); }
     100% { opacity:1; transform:scaleY(1) scaleX(1); }
   }
   @keyframes treeSway{
@@ -928,9 +931,16 @@ try{
     const pt=path.getPointAtLength(len*progress);
     dot.setAttribute('transform', `translate(${pt.x},${pt.y})`);
 
-    trees.forEach(tree=>{
+    trees.forEach((tree,i)=>{
       const at=parseFloat(tree.dataset.at || '0');
-      tree.classList.toggle('show', progress>=at);
+      // Reveal once and leave revealed (no toggling back off on scroll jitter), and stagger
+      // each tree's start so a fast scroll that passes several thresholds at once still
+      // grows them in one after another instead of all playing the same animation together.
+      if(progress>=at && !tree.classList.contains('show')){
+        const delay=i*160;
+        tree.style.animationDelay = delay+'ms, '+(delay+1300)+'ms';
+        tree.classList.add('show');
+      }
     });
 
     if(window.innerWidth>600){
