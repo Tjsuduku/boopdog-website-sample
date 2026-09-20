@@ -265,17 +265,26 @@
   }
   .journey-stitch{ stroke:var(--bone); stroke-width:1.5; stroke-dasharray:3 10; fill:none; opacity:.55; }
   .journey-emoji{ font-size:20px; text-anchor:middle; dominant-baseline:central; }
-  /* Trees grow up out of the ground along the sides of the path as it's walked/scrolled.
-     Drawn as real layered SVG tree shapes (see <symbol id="treePine"/"treeRound">), not emoji. */
+  /* Trees sprout up out of the ground along the sides of the path as it's walked/scrolled.
+     Drawn as real layered SVG tree shapes (see <symbol id="treePine"/"treeRound">), not emoji.
+     Anchored at the ground (transform-origin bottom) so they visibly rise out of the soil, then
+     bounce past full height and settle — a springy "popping out of the ground" grow-in, not a fade. */
   .journey-tree{
     opacity:0; transform-box:fill-box; transform-origin:50% 100%;
-    transform:scale(.55,.06) translateY(3px);
-    transition:opacity 1.1s ease, transform 1.6s cubic-bezier(.18,1.4,.32,1);
+    transform:scaleY(.02) scaleX(.4);
     filter:drop-shadow(0 4px 5px rgba(43,32,24,.28));
   }
   .journey-tree.show{
-    opacity:1; transform:scale(1,1) translateY(0);
-    animation:treeSway 5.5s ease-in-out 1.6s infinite;
+    animation:treeSprout 2s cubic-bezier(.25,.65,.3,1) forwards, treeSway 5.5s ease-in-out 2s infinite;
+  }
+  @keyframes treeSprout{
+    0%   { opacity:0; transform:scaleY(.02) scaleX(.4); }
+    6%   { opacity:1; }
+    38%  { transform:scaleY(1.22) scaleX(.82); }
+    58%  { transform:scaleY(.88) scaleX(1.08); }
+    76%  { transform:scaleY(1.08) scaleX(.95); }
+    90%  { transform:scaleY(.97) scaleX(1.02); }
+    100% { opacity:1; transform:scaleY(1) scaleX(1); }
   }
   @keyframes treeSway{
     0%,100%{ transform:scale(1,1) rotate(0deg); }
