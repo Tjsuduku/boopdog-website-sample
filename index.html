@@ -265,11 +265,11 @@
   }
   .journey-stitch{ stroke:var(--bone); stroke-width:1.5; stroke-dasharray:3 10; fill:none; opacity:.55; }
   .journey-emoji{ font-size:20px; text-anchor:middle; dominant-baseline:central; }
-  /* Trees grow up out of the ground one at a time as the path is walked/scrolled.
-     Drawn as real layered SVG tree shapes (see <symbol id="treePine"/"treeRound">), not emoji.
-     Anchored at the ground (transform-origin bottom): a single clean rise with one gentle
-     overshoot, not a repeated bounce — JS staggers each tree's animation-delay (see render())
-     so several revealed in one scroll motion still grow in sequence, not all at once. */
+  /* Each tree pops straight up out of the ground independently, right at the instant the
+     marker passes its own point on the path — not chained, staggered, or timed off any
+     other tree. Drawn as real layered SVG tree shapes (see <symbol id="treePine"/"treeRound">),
+     not emoji. Anchored at the ground (transform-origin bottom) so it only ever grows upward
+     from where it stands, never drops in or slides from above. */
   .journey-tree{
     opacity:0; transform-box:fill-box; transform-origin:50% 100%;
     transform:scaleY(.05) scaleX(.6);
@@ -277,16 +277,16 @@
   }
   .journey-tree.show{
     animation-name:treeGrow, treeSway;
-    animation-duration:1.3s, 5.5s;
+    animation-duration:.6s, 5.5s;
     animation-timing-function:cubic-bezier(.22,.85,.34,1), ease-in-out;
     animation-iteration-count:1, infinite;
     animation-fill-mode:forwards, none;
-    /* animation-delay is set per-tree from JS so multiple trees cascade in rather than pop together */
+    animation-delay:0s, .6s;
   }
   @keyframes treeGrow{
     0%   { opacity:0; transform:scaleY(.05) scaleX(.6); }
-    12%  { opacity:1; }
-    72%  { transform:scaleY(1.07) scaleX(.96); }
+    18%  { opacity:1; }
+    75%  { transform:scaleY(1.06) scaleX(.97); }
     100% { opacity:1; transform:scaleY(1) scaleX(1); }
   }
   @keyframes treeSway{
@@ -931,14 +931,12 @@ try{
     const pt=path.getPointAtLength(len*progress);
     dot.setAttribute('transform', `translate(${pt.x},${pt.y})`);
 
-    trees.forEach((tree,i)=>{
+    trees.forEach(tree=>{
       const at=parseFloat(tree.dataset.at || '0');
-      // Reveal once and leave revealed (no toggling back off on scroll jitter), and stagger
-      // each tree's start so a fast scroll that passes several thresholds at once still
-      // grows them in one after another instead of all playing the same animation together.
+      // Each tree pops up on its own, the instant the marker passes its point on the path —
+      // no shared delay or stagger between trees, so they never look chained/dragged off one
+      // another. Reveal once and leave revealed (no toggling back off on scroll jitter).
       if(progress>=at && !tree.classList.contains('show')){
-        const delay=i*160;
-        tree.style.animationDelay = delay+'ms, '+(delay+1300)+'ms';
         tree.classList.add('show');
       }
     });
